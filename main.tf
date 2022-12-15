@@ -5,6 +5,8 @@ variable subnet_cidr_block{}
 variable avail_zone{}
 variable env_prefix{}
 variable instance_type{}
+variable public_key_location{}
+variable private_key_location{}
 resource "aws_vpc" "custom-vpc"{
   cidr_block = var.vpc_cidr_block
   tags = {
@@ -94,6 +96,11 @@ data "aws_ami" "amazon-linux-2" {
   }
  
 }
+resource "aws_key_pair" "ssh_key"{
+  key_name ="server-key"
+  public_key = file(var.public_key_location)
+}
+
 resource "aws_instance" "dev-server"{
   ami = data.aws_ami.amazon-linux-2.id
   instance_type = var.instance_type
@@ -101,12 +108,43 @@ resource "aws_instance" "dev-server"{
   vpc_security_group_ids = [aws_default_security_group.default-sg.id]
   availability_zone = var.avail_zone
   associate_public_ip_address = true
-  key_name = "testInstance"
+  key_name = aws_key_pair.ssh_key.key_name
   user_data = file("bootscript.sh")
+
+  /*
+  
+  --------------------- Provisioners --------------
+
+connection{
+    type = "ssh"
+    host = self.public_ip
+    user = "ec2-user"
+    private_key = file(var.private_key_location)
+
+  }
+  provisioner "file" {
+    source ="run-docker.sh"
+    destination = "/home/ec2-user/run-docker.sh"
+
+  }
+  provisioner "remote-exec" {
+      script = file("run-docker.sh")
+  }
+  provisioner "local-exec" {
+      command = "echo ${self.public_ip}"
+  }
+
+
+  
+  */
+  
+
+
    tags = {
     Name: "${var.env_prefix}-nginx-server"
   }
 }
+
 
 
 
@@ -144,5 +182,37 @@ resource "aws_instance" "dev-server"{
     Name: "${var.env_prefix}-nginx-server"
   }
 }
+
+resource "aws_instance" "dev-server"{
+  ami = data.aws_ami.amazon-linux-2.id
+  instance_type = var.instance_type
+  subnet_id = aws_subnet.pub-subnet.id
+  vpc_security_group_ids = [aws_default_security_group.default-sg.id]
+  availability_zone = var.avail_zone
+  associate_public_ip_address = true
+  key_name = aws_key_pair.ssh_key.key_name
+  #user_data = file("bootscript.sh")
+  connection{
+    type = "ssh"
+    host = self.public_ip
+    user = "ec2-user"
+    private_key = file(var.private_key_location)
+
+  }
+  provisioner "remote-exec" {
+      inline =[
+        "export ENV = staging",
+        "touch file.txt"
+      ]
+  }
+
+
+   tags = {
+    Name: "${var.env_prefix}-nginx-server"
+  }
+}
+
+
+
 
 */
