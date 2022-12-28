@@ -100,37 +100,13 @@ resource "aws_instance" "dev-server"{
   availability_zone = var.avail_zone
   associate_public_ip_address = true
   key_name = "testInstance"
-  user_data = file("bootscript.sh")
+  #user_data = file("bootscript.sh")
    tags = {
     Name: "${var.env_prefix}-nginx-server"
   }
 }
-resource "aws_instance" "dev-server2"{
-  ami = data.aws_ami.amazon-linux-2.id
-  instance_type = var.instance_type
-  subnet_id = aws_subnet.pub-subnet.id
-  vpc_security_group_ids = [aws_default_security_group.default-sg.id]
-  availability_zone = var.avail_zone
-  associate_public_ip_address = true
-  key_name = "testInstance"
-  user_data = file("bootscript.sh")
-   tags = {
-    Name: "${var.env_prefix}-nginx-server2"
-  }
-}
-resource "aws_instance" "dev-server3"{
-  ami = data.aws_ami.amazon-linux-2.id
-  instance_type = var.instance_type
-  subnet_id = aws_subnet.pub-subnet.id
-  vpc_security_group_ids = [aws_default_security_group.default-sg.id]
-  availability_zone = var.avail_zone
-  associate_public_ip_address = true
-  key_name = "testInstance"
-  user_data = file("bootscript.sh")
-   tags = {
-    Name: "${var.env_prefix}-nginx-server3"
-  }
-}
+
+
 
 
 
