@@ -102,7 +102,7 @@ resource "aws_instance" "dev-server"{
   key_name = "testInstance"
   #user_data = file("bootscript.sh")
    tags = {
-    Name: "${var.env_prefix}-nginx-server"
+    Name: "${var.env_prefix}-server"
   }
 }
 
